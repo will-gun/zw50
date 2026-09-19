@@ -1,6 +1,7 @@
 import csv
 import html
 import json
+import os
 from pathlib import Path
 import subprocess
 from urllib.request import urlopen
@@ -11,6 +12,8 @@ ROOT = Path(__file__).parent
 INPUT_FILE = ROOT / "candi.csv"
 OUTPUT_FILE = ROOT / "index.html"
 SCRIPT_FILE = Path(__file__).name
+ADSENSE_CLIENT = os.environ.get("ADSENSE_CLIENT", "").strip()
+ADSENSE_SLOT = os.environ.get("ADSENSE_SLOT", "").strip()
 
 
 def load_codes(limit: int = 50) -> list[str]:
@@ -44,6 +47,7 @@ def build_html(rows: list[tuple[int, str, str]]) -> str:
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>候選股票前 50 名</title>
+{f'  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={html.escape(ADSENSE_CLIENT)}" crossorigin="anonymous"></script>' if ADSENSE_CLIENT and ADSENSE_SLOT else ''}
   <style>
     :root {{ color-scheme: light; font-family: system-ui, -apple-system, sans-serif; }}
     body {{ margin: 0; background: #f4f6f8; color: #17212b; }}
@@ -61,6 +65,13 @@ def build_html(rows: list[tuple[int, str, str]]) -> str:
 <body>
   <main>
     <h1>候選股票前 50 名</h1>
+{f'''    <ins class="adsbygoogle"
+            style="display:block"
+            data-ad-client="{html.escape(ADSENSE_CLIENT)}"
+            data-ad-slot="{html.escape(ADSENSE_SLOT)}"
+            data-ad-format="auto"
+            data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({{}});</script>''' if ADSENSE_CLIENT and ADSENSE_SLOT else ''}
     <table>
       <thead><tr><th>index</th><th>數字code</th><th>中文名稱</th></tr></thead>
       <tbody>
